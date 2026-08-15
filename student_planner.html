@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarsHub | All-in-One Student Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center lg:hidden">
+                    <button onclick="toggleMobileMenu()" class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- App Brand / Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                    <div class="w-10 h-10 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-brand-500/20">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-tight text-slate-900 block leading-none">ScholarsHub</span>
+                        <span class="text-xs text-slate-500 font-medium">Student Success Planner</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                <nav class="hidden lg:flex space-x-1">
+                    <button onclick="switchTab('dashboard')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition" data-tab="dashboard"><i class="fa-solid fa-house mr-2"></i>Dashboard</button>
+                    <button onclick="switchTab('timetable')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition" data-tab="timetable"><i class="fa-solid fa-calendar-days mr-2"></i>Timetable</button>
+                    <button onclick="switchTab('assignments')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition" data-tab="assignments"><i class="fa-solid fa-list-check mr-2"></i>Assignments</button>
+                    <button onclick="switchTab('cgpa')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition" data-tab="cgpa"><i class="fa-solid fa-calculator mr-2"></i>CGPA Calc</button>
+                    <button onclick="switchTab('exams')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition" data-tab="exams"><i class="fa-solid fa-hourglass-half mr-2"></i>Exams</button>
+                    <button onclick="switchTab('notes')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition" data-tab="notes"><i class="fa-solid fa-book-open mr-2"></i>Notes</button>
+                </nav>
+
+                <!-- User Profile / Quick Status -->
+                <div class="flex items-center space-x-3">
+                    <div class="text-right hidden sm:block">
+                        <span id="header-student-name" class="text-sm font-bold text-slate-800 block">Alex Morgan</span>
+                        <span class="text-xs text-brand-600 font-semibold bg-brand-50 px-2 py-0.5 rounded-md">Year 3 Sem 1</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-brand-500 overflow-hidden flex items-center justify-center font-bold text-slate-700">
+                        AM
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-4 space-y-1">
+            <button onclick="switchTab('dashboard'); toggleMobileMenu();" class="block w-full text-left py-2.5 px-3 rounded-xl text-slate-700 font-semibold hover:bg-slate-100"><i class="fa-solid fa-house mr-3 text-brand-500"></i>Dashboard</button>
+            <button onclick="switchTab('timetable'); toggleMobileMenu();" class="block w-full text-left py-2.5 px-3 rounded-xl text-slate-700 font-semibold hover:bg-slate-100"><i class="fa-solid fa-calendar-days mr-3 text-brand-500"></i>Timetable</button>
+            <button onclick="switchTab('assignments'); toggleMobileMenu();" class="block w-full text-left py-2.5 px-3 rounded-xl text-slate-700 font-semibold hover:bg-slate-100"><i class="fa-solid fa-list-check mr-3 text-brand-500"></i>Assignments</button>
+            <button onclick="switchTab('cgpa'); toggleMobileMenu();" class="block w-full text-left py-2.5 px-3 rounded-xl text-slate-700 font-semibold hover:bg-slate-100"><i class="fa-solid fa-calculator mr-3 text-brand-500"></i>CGPA Calculator</button>
+            <button onclick="switchTab('exams'); toggleMobileMenu();" class="block w-full text-left py-2.5 px-3 rounded-xl text-slate-700 font-semibold hover:bg-slate-100"><i class="fa-solid fa-hourglass-half mr-3 text-brand-500"></i>Exam Countdown</button>
+            <button onclick="switchTab('notes'); toggleMobileMenu();" class="block w-full text-left py-2.5 px-3 rounded-xl text-slate-700 font-semibold hover:bg-slate-100"><i class="fa-solid fa-book-open mr-3 text-brand-500"></i>Notes Section</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen pb-24">
+
+        <!-- TAB: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content space-y-8 animate-fade-in">
+            <!-- Greeting & Quick Stats Bar -->
+            <div class="bg-gradient-to-r from-brand-600 to-indigo-700 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="absolute right-0 bottom-0 opacity-10 translate-x-10 translate-y-10 pointer-events-none">
+                    <i class="fa-solid fa-graduation-cap text-9xl sm:text-[220px]"></i>
+                </div>
+                <div class="relative z-10">
+                    <span id="current-date-badge" class="bg-white/20 backdrop-blur-sm text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-widest mb-3 inline-block">Monday, August 17</span>
+                    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Welcome back, Alex! 👋</h1>
+                    <p class="text-brand-100 mt-2 text-sm sm:text-base max-w-xl">You have <span id="dash-pending-count" class="font-bold underline">0</span> pending assignments and <span id="dash-exam-count" class="font-bold underline">0</span> upcoming exams this week.</p>
+                </div>
+                <div class="relative z-10 flex gap-3 w-full sm:w-auto">
+                    <button onclick="switchTab('assignments')" class="bg-white text-brand-600 font-semibold px-5 py-3 rounded-2xl shadow hover:bg-brand-50 transition text-sm flex-1 sm:flex-none text-center">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Task
+                    </button>
+                    <button onclick="switchTab('notes')" class="bg-brand-500/50 border border-white/30 text-white font-semibold px-5 py-3 rounded-2xl hover:bg-brand-500 transition text-sm flex-1 sm:flex-none text-center">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Quick Note
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid: Daily Goals & Quick Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Daily Goals Widget (Left 2 cols) -->
+                <div class="lg:col-span-2 bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-slate-900">Today's Daily Goals</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Check off your habits and goals for today to maintain momentum.</p>
+                            </div>
+                            <span id="goal-progress-badge" class="text-xs font-bold bg-brand-50 text-brand-600 px-3 py-1.5 rounded-xl">0% Done</span>
+                        </div>
+
+                        <!-- Add Goal Input -->
+                        <form onsubmit="addDailyGoal(event)" class="flex gap-2 mb-6">
+                            <input type="text" id="goal-input" required placeholder="e.g. Read Chapter 4 of Data Structures..." class="flex-grow p-3 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                            <button type="submit" class="bg-slate-900 text-white font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-slate-800 transition">
+                                Add Goal
+                            </button>
+                        </form>
+
+                        <!-- Goals List -->
+                        <div id="goals-list" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Exam Countdown Card (Right Col) -->
+                <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-slate-900">Nearest Exam</h2>
+                            <button onclick="switchTab('exams')" class="text-xs text-brand-600 font-semibold hover:underline">View All</button>
+                        </div>
+                        <div id="dash-nearest-exam" class="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center py-8">
+                            <i class="fa-solid fa-calendar-check text-slate-300 text-3xl mb-2"></i>
+                            <p class="text-sm font-semibold text-slate-600">No exams scheduled.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between text-xs text-slate-500 font-medium">
+                        <span>Current CGPA: <strong id="dash-current-cgpa" class="text-slate-900 text-sm">0.00</strong></span>
+                        <span>Total Credits: <strong id="dash-total-credits" class="text-slate-900 text-sm">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: TIMETABLE -->
+        <div id="tab-timetable" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Class Timetable</h1>
+                    <p class="text-slate-500 text-sm mt-1">Organize your weekly lectures, room numbers, and timings.</p>
+                </div>
+                <button onclick="openClassModal()" class="bg-brand-600 text-white font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Class
+                </button>
+            </div>
+
+            <!-- Day Selector Tabs -->
+            <div class="flex gap-2 overflow-x-auto pb-2" id="timetable-day-buttons">
+                <button onclick="selectTimetableDay('Monday')" class="tt-day-btn px-5 py-2.5 rounded-2xl text-sm font-semibold bg-brand-600 text-white shadow-sm whitespace-nowrap">Monday</button>
+                <button onclick="selectTimetableDay('Tuesday')" class="tt-day-btn px-5 py-2.5 rounded-2xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 whitespace-nowrap">Tuesday</button>
+                <button onclick="selectTimetableDay('Wednesday')" class="tt-day-btn px-5 py-2.5 rounded-2xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 whitespace-nowrap">Wednesday</button>
+                <button onclick="selectTimetableDay('Thursday')" class="tt-day-btn px-5 py-2.5 rounded-2xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 whitespace-nowrap">Thursday</button>
+                <button onclick="selectTimetableDay('Friday')" class="tt-day-btn px-5 py-2.5 rounded-2xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 whitespace-nowrap">Friday</button>
+                <button onclick="selectTimetableDay('Saturday')" class="tt-day-btn px-5 py-2.5 rounded-2xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 whitespace-nowrap">Saturday</button>
+            </div>
+
+            <!-- Timetable Schedule List -->
+            <div id="timetable-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- TAB: ASSIGNMENTS & TASKS -->
+        <div id="tab-assignments" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Assignment Tracker</h1>
+                    <p class="text-slate-500 text-sm mt-1">Keep track of homework, project deadlines, and completion statuses.</p>
+                </div>
+                <button onclick="openAssignmentModal()" class="bg-brand-600 text-white font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Assignment
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex gap-2 overflow-x-auto pb-2">
+                <button onclick="filterAssignments('all')" class="assign-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">All Tasks</button>
+                <button onclick="filterAssignments('pending')" class="assign-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200">Pending</button>
+                <button onclick="filterAssignments('completed')" class="assign-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200">Completed</button>
+            </div>
+
+            <!-- Assignment Grid -->
+            <div id="assignments-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- TAB: CGPA CALCULATOR -->
+        <div id="tab-cgpa" class="tab-content hidden space-y-8 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">CGPA & Grade Calculator</h1>
+                    <p class="text-slate-500 text-sm mt-1">Calculate your semester GPA and cumulative CGPA easily.</p>
+                </div>
+                <button onclick="openCourseModal()" class="bg-brand-600 text-white font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Course
+                </button>
+            </div>
+
+            <!-- CGPA Summary Card -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Current CGPA</span>
+                    <div id="cgpa-display" class="text-4xl font-bold text-brand-600 mt-2">0.00</div>
+                    <span id="cgpa-status-text" class="text-xs font-semibold text-slate-500 mt-1 block">No courses added yet</span>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Total Credit Units</span>
+                    <div id="total-credits-display" class="text-4xl font-bold text-slate-900 mt-2">0</div>
+                    <span class="text-xs font-semibold text-slate-500 mt-1 block">Registered credits</span>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Total Quality Points</span>
+                    <div id="total-qp-display" class="text-4xl font-bold text-slate-900 mt-2">0.0</div>
+                    <span class="text-xs font-semibold text-slate-500 mt-1 block">Grade points &times; units</span>
+                </div>
+            </div>
+
+            <!-- Courses Table -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 font-bold text-slate-900">Registered Courses & Grades</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider">
+                                <th class="p-4 font-semibold">Course Code</th>
+                                <th class="p-4 font-semibold">Course Name</th>
+                                <th class="p-4 font-semibold">Credit Units</th>
+                                <th class="p-4 font-semibold">Grade</th>
+                                <th class="p-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cgpa-courses-tbody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: EXAM COUNTDOWN -->
+        <div id="tab-exams" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Exam Countdown & Prep</h1>
+                    <p class="text-slate-500 text-sm mt-1">Never miss an exam date. Stay ahead of your tests.</p>
+                </div>
+                <button onclick="openExamModal()" class="bg-brand-600 text-white font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Exam
+                </button>
+            </div>
+
+            <!-- Exams Grid -->
+            <div id="exams-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- TAB: NOTES SECTION -->
+        <div id="tab-notes" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Study Notes & Summaries</h1>
+                    <p class="text-slate-500 text-sm mt-1">Jot down quick revision notes, formulas, and lecture summaries.</p>
+                </div>
+                <button onclick="openNoteModal()" class="bg-brand-600 text-white font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> New Note
+                </button>
+            </div>
+
+            <!-- Search Notes -->
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="notes-search" oninput="renderNotes()" placeholder="Search notes by title or subject..." class="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none bg-white">
+            </div>
+
+            <!-- Notes Grid -->
+            <div id="notes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+    </main>
+
+
+    <!-- Modal: Add Class (Timetable) -->
+    <div id="class-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-fade-in">
+            <button onclick="closeClassModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Add Class to Timetable</h2>
+            <form onsubmit="submitClass(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Course Title / Code</label>
+                    <input type="text" id="class-title" required placeholder="e.g. CSC 301: Data Structures" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Day</label>
+                        <select id="class-day" class="w-full p-3 rounded-xl border border-slate-200 text-sm bg-white outline-none">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Time</label>
+                        <input type="text" id="class-time" required placeholder="09:00 AM - 11:00 AM" class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Room / Location</label>
+                    <input type="text" id="class-room" required placeholder="Lecture Hall B, Science Complex" class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Lecturer</label>
+                    <input type="text" id="class-lecturer" placeholder="Dr. Sarah Johnson" class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white font-semibold py-3.5 rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-500/20">Save Class</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Assignment -->
+    <div id="assignment-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-fade-in">
+            <button onclick="closeAssignmentModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Add Assignment / Task</h2>
+            <form onsubmit="submitAssignment(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Task Title</label>
+                    <input type="text" id="assign-title" required placeholder="e.g. Database Lab Report #2" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Subject / Course</label>
+                    <input type="text" id="assign-subject" required placeholder="e.g. Database Systems" class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Due Date</label>
+                        <input type="date" id="assign-date" required class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Priority</label>
+                        <select id="assign-priority" class="w-full p-3 rounded-xl border border-slate-200 text-sm bg-white outline-none">
+                            <option value="High">High</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Description / Notes</label>
+                    <textarea id="assign-desc" rows="3" placeholder="Submit via university portal as PDF..." class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white font-semibold py-3.5 rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-500/20">Save Assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add CGPA Course -->
+    <div id="course-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-fade-in">
+            <button onclick="closeCourseModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Add Course for CGPA</h2>
+            <form onsubmit="submitCourse(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Course Code</label>
+                    <input type="text" id="course-code" required placeholder="e.g. MTH 301" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Course Name</label>
+                    <input type="text" id="course-name" required placeholder="e.g. Numerical Analysis" class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Credit Units</label>
+                        <input type="number" id="course-units" min="1" max="10" value="3" required class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Grade</label>
+                        <select id="course-grade" class="w-full p-3 rounded-xl border border-slate-200 text-sm bg-white outline-none">
+                            <option value="A">A (5.0 / 90-100%)</option>
+                            <option value="B">B (4.0 / 80-89%)</option>
+                            <option value="C">C (3.0 / 70-79%)</option>
+                            <option value="D">D (2.0 / 60-69%)</option>
+                            <option value="E">E (1.0 / 50-59%)</option>
+                            <option value="F">F (0.0 / Below 50%)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white font-semibold py-3.5 rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-500/20">Add Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Exam Countdown -->
+    <div id="exam-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-fade-in">
+            <button onclick="closeExamModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Add Exam Countdown</h2>
+            <form onsubmit="submitExam(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Exam Title / Course</label>
+                    <input type="text" id="exam-title" required placeholder="e.g. Operating Systems Final" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Exam Date</label>
+                        <input type="date" id="exam-date" required class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Time</label>
+                        <input type="text" id="exam-time" placeholder="10:00 AM" required class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Location / Venue</label>
+                    <input type="text" id="exam-location" placeholder="Exam Hall A" required class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white font-semibold py-3.5 rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-500/20">Set Countdown</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Note -->
+    <div id="note-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative animate-fade-in">
+            <button onclick="closeNoteModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Create Study Note</h2>
+            <form onsubmit="submitNote(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Note Title</label>
+                    <input type="text" id="note-title" required placeholder="e.g. Graph Theory Summary & Dijkstra Algorithm" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Subject / Tag</label>
+                    <input type="text" id="note-subject" required placeholder="e.g. Data Structures" class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Content / Summary</label>
+                    <textarea id="note-content" required rows="6" placeholder="Write or paste your study notes here..." class="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white font-semibold py-3.5 rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-500/20">Save Note</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initial Mock Data Store (stored in localStorage if available)
+        let timetableData = JSON.parse(localStorage.getItem('scholars_timetable')) || [
+            { id: 1, title: "CSC 301: Data Structures", day: "Monday", time: "09:00 AM - 11:00 AM", room: "Lab 3, Tech Building", lecturer: "Dr. Alan Turing" },
+            { id: 2, title: "MTH 301: Numerical Methods", day: "Monday", time: "01:00 PM - 03:00 PM", room: "Hall B, Math Block", lecturer: "Prof. Ada Lovelace" },
+            { id: 3, title: "DB 305: Database Systems", day: "Tuesday", time: "10:00 AM - 12:00 PM", room: "Room 402", lecturer: "Dr. Grace Hopper" },
+            { id: 4, title: "SE 302: Software Engineering", day: "Wednesday", time: "02:00 PM - 04:00 PM", room: "Auditorium 1", lecturer: "Dr. Linus Torvalds" }
+        ];
+
+        let assignmentsData = JSON.parse(localStorage.getItem('scholars_assignments')) || [
+            { id: 1, title: "Binary Search Tree Implementation", subject: "Data Structures", date: "2026-08-22", priority: "High", completed: false, desc: "Implement in C++ with full unit tests." },
+            { id: 2, title: "SQL Normalization Report", subject: "Database Systems", date: "2026-08-25", priority: "Medium", completed: false, desc: "Submit PDF report covering 3NF." },
+            { id: 3, title: "UML Class Diagram Draft", subject: "Software Engineering", date: "2026-08-19", priority: "High", completed: true, desc: "Group project diagram." }
+        ];
+
+        let coursesData = JSON.parse(localStorage.getItem('scholars_courses')) || [
+            { id: 1, code: "CSC 301", name: "Data Structures & Algorithms", units: 4, grade: "A" },
+            { id: 2, code: "MTH 301", name: "Numerical Methods", units: 3, grade: "B" },
+            { id: 3, code: "DB 305", name: "Database Systems", units: 3, grade: "A" },
+            { id: 4, code: "SE 302", name: "Software Engineering", units: 4, grade: "B" }
+        ];
+
+        let examsData = JSON.parse(localStorage.getItem('scholars_exams')) || [
+            { id: 1, title: "Data Structures Midterm", date: "2026-09-05", time: "09:00 AM", location: "Exam Hall A" },
+            { id: 2, title: "Database Systems Final", date: "2026-09-18", time: "01:30 PM", location: "Computer Center" }
+        ];
+
+        let notesData = JSON.parse(localStorage.getItem('scholars_notes')) || [
+            { id: 1, title: "Dijkstra's Algorithm Overview", subject: "Data Structures", date: "August 14, 2026", content: "Used for finding the shortest paths between nodes in a graph. Time complexity with min-priority queue is O((V + E) log V)." },
+            { id: 2, title: "Database ACID Properties", subject: "Database Systems", date: "August 12, 2026", content: "Atomicity, Consistency, Isolation, Durability. Ensures reliable transaction processing in relational DBs." }
+        ];
+
+        let dailyGoalsData = JSON.parse(localStorage.getItem('scholars_goals')) || [
+            { id: 1, text: "Review lecture slides for Software Engineering", completed: true },
+            { id: 2, text: "Complete 2 coding problems on trees", completed: false },
+            { id: 3, text: "Organize notes for Database Systems", completed: false }
+        ];
+
+        let currentTimetableDay = 'Monday';
+        let currentAssignmentFilter = 'all';
+
+        // Initialization on Load
+        window.onload = function() {
+            // Set header date badge
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            document.getElementById('current-date-badge').textContent = new Date().toLocaleDateString('en-US', options);
+
+            renderDashboard();
+            renderTimetable();
+            renderAssignments();
+            renderCGPA();
+            renderExams();
+            renderNotes();
+            renderDailyGoals();
+        };
+
+        // Save State to LocalStorage
+        function saveState() {
+            localStorage.setItem('scholars_timetable', JSON.stringify(timetableData));
+            localStorage.setItem('scholars_assignments', JSON.stringify(assignmentsData));
+            localStorage.setItem('scholars_courses', JSON.stringify(coursesData));
+            localStorage.setItem('scholars_exams', JSON.stringify(examsData));
+            localStorage.setItem('scholars_notes', JSON.stringify(notesData));
+            localStorage.setItem('scholars_goals', JSON.stringify(dailyGoalsData));
+        }
+
+        // Tab Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('bg-brand-50', 'text-brand-600');
+                    btn.classList.remove('text-slate-600');
+                } else {
+                    btn.classList.remove('bg-brand-50', 'text-brand-600');
+                    btn.classList.add('text-slate-600');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- DASHBOARD RENDERER ---
+        function renderDashboard() {
+            const pendingCount = assignmentsData.filter(a => !a.completed).length;
+            document.getElementById('dash-pending-count').textContent = pendingCount;
+            document.getElementById('dash-exam-count').textContent = examsData.length;
+
+            // Calculate CGPA for dashboard
+            let totalPoints = 0;
+            let totalUnits = 0;
+            const gradePoints = { 'A': 5.0, 'B': 4.0, 'C': 3.0, 'D': 2.0, 'E': 1.0, 'F': 0.0 };
+
+            coursesData.forEach(c => {
+                const pts = (gradePoints[c.grade] || 0) * c.units;
+                totalPoints += pts;
+                totalUnits += parseInt(c.units);
+            });
+
+            const cgpa = totalUnits > 0 ? (totalPoints / totalUnits).toFixed(2) : '0.00';
+            document.getElementById('dash-current-cgpa').textContent = cgpa;
+            document.getElementById('dash-total-credits').textContent = totalUnits;
+
+            // Nearest Exam
+            const nearestExamContainer = document.getElementById('dash-nearest-exam');
+            if(examsData.length === 0) {
+                nearestExamContainer.innerHTML = `
+                    <i class="fa-solid fa-calendar-check text-slate-300 text-3xl mb-2"></i>
+                    <p class="text-sm font-semibold text-slate-600">No exams scheduled.</p>
+                `;
+            } else {
+                // sort by date
+                const sortedExams = [...examsData].sort((a,b) => new Date(a.date) - new Date(b.date));
+                const nextExam = sortedExams[0];
+                const diffDays = Math.ceil((new Date(nextExam.date) - new Date()) / (1000 * 60 * 60 * 24));
+
+                nearestExamContainer.innerHTML = `
+                    <span class="bg-brand-50 text-brand-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">${nextExam.location}</span>
+                    <h3 class="font-bold text-slate-900 text-lg mb-1">${nextExam.title}</h3>
+                    <p class="text-xs text-slate-500 mb-3">${nextExam.date} at ${nextExam.time}</p>
+                    <div class="text-2xl font-extrabold text-brand-600">${diffDays >= 0 ? diffDays + ' Days Left' : 'Exam Passed'}</div>
+                `;
+            }
+        }
+
+        // --- DAILY GOALS LOGIC ---
+        function renderDailyGoals() {
+            const container = document.getElementById('goals-list');
+            const completedCount = dailyGoalsData.filter(g => g.completed).length;
+            const total = dailyGoalsData.length;
+            const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+            document.getElementById('goal-progress-badge').textContent = `${pct}% Done`;
+
+            if(total === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No daily goals added yet. Add one above!</p>`;
+                return;
+            }
+
+            container.innerHTML = dailyGoalsData.map(g => `
+                <div class="flex items-center justify-between p-3.5 rounded-2xl border ${g.completed ? 'bg-slate-50 border-slate-200 opacity-70' : 'bg-white border-slate-200 shadow-sm'} transition">
+                    <label class="flex items-center gap-3 cursor-pointer flex-grow">
+                        <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleDailyGoal(${g.id})" class="w-5 h-5 rounded-lg text-brand-600 focus:ring-brand-500">
+                        <span class="text-sm font-medium ${g.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${g.text}</span>
+                    </label>
+                    <button onclick="deleteDailyGoal(${g.id})" class="text-slate-400 hover:text-red-500 p-1 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function addDailyGoal(e) {
+            e.preventDefault();
+            const input = document.getElementById('goal-input');
+            dailyGoalsData.push({
+                id: Date.now(),
+                text: input.value.trim(),
+                completed: false
+            });
+            input.value = '';
+            saveState();
+            renderDailyGoals();
+            showToast("Daily goal added!");
+        }
+
+        function toggleDailyGoal(id) {
+            const goal = dailyGoalsData.find(g => g.id === id);
+            if(goal) {
+                goal.completed = !goal.completed;
+                saveState();
+                renderDailyGoals();
+            }
+        }
+
+        function deleteDailyGoal(id) {
+            dailyGoalsData = dailyGoalsData.filter(g => g.id !== id);
+            saveState();
+            renderDailyGoals();
+        }
+
+        // --- TIMETABLE LOGIC ---
+        function selectTimetableDay(day) {
+            currentTimetableDay = day;
+            document.querySelectorAll('.tt-day-btn').forEach(btn => {
+                if(btn.textContent.trim() === day) {
+                    btn.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+                } else {
+                    btn.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
+                    btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+                }
+            });
+            renderTimetable();
+        }
+
+        function renderTimetable() {
+            const container = document.getElementById('timetable-container');
+            const dayClasses = timetableData.filter(c => c.day === currentTimetableDay);
+
+            if(dayClasses.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+                        <i class="fa-solid fa-mug-hot text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800">No classes scheduled for ${currentTimetableDay}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Enjoy your free time or use it for revision!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = dayClasses.map(c => `
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between relative group">
+                    <button onclick="deleteClass(${c.id})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition"><i class="fa-solid fa-trash-can"></i></button>
+                    <div>
+                        <span class="bg-brand-50 text-brand-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-3">${c.time}</span>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">${c.title}</h3>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-2"><i class="fa-solid fa-location-dot text-brand-500"></i> ${c.room}</p>
+                        ${c.lecturer ? `<p class="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><i class="fa-solid fa-chalkboard-user text-brand-500"></i> ${c.lecturer}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openClassModal() { document.getElementById('class-modal').classList.remove('hidden'); }
+        function closeClassModal() { document.getElementById('class-modal').classList.add('hidden'); }
+
+        function submitClass(e) {
+            e.preventDefault();
+            timetableData.push({
+                id: Date.now(),
+                title: document.getElementById('class-title').value,
+                day: document.getElementById('class-day').value,
+                time: document.getElementById('class-time').value,
+                room: document.getElementById('class-room').value,
+                lecturer: document.getElementById('class-lecturer').value
+            });
+            saveState();
+            closeClassModal();
+            renderTimetable();
+            showToast("Class added to timetable!");
+            e.target.reset();
+        }
+
+        function deleteClass(id) {
+            timetableData = timetableData.filter(c => c.id !== id);
+            saveState();
+            renderTimetable();
+            showToast("Class removed.");
+        }
+
+        // --- ASSIGNMENTS LOGIC ---
+        function filterAssignments(filter) {
+            currentAssignmentFilter = filter;
+            document.querySelectorAll('.assign-filter-btn').forEach(btn => {
+                if(btn.textContent.toLowerCase().includes(filter)) {
+                    btn.classList.add('bg-slate-900', 'text-white');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+                } else {
+                    btn.classList.remove('bg-slate-900', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+                }
+            });
+            renderAssignments();
+        }
+
+        function renderAssignments() {
+            const container = document.getElementById('assignments-container');
+            let filtered = assignmentsData;
+            if(currentAssignmentFilter === 'pending') filtered = assignmentsData.filter(a => !a.completed);
+            if(currentAssignmentFilter === 'completed') filtered = assignmentsData.filter(a => a.completed);
+
+            if(filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+                        <i class="fa-solid fa-list-check text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800">No assignments found</h3>
+                        <p class="text-xs text-slate-500 mt-1">You are fully up to date on your tasks!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(a => `
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between ${a.completed ? 'opacity-75 bg-slate-50/50' : ''}">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase px-3 py-1 rounded-full ${a.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}">${a.priority} Priority</span>
+                            <button onclick="deleteAssignment(${a.id})" class="text-slate-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                        <span class="text-xs font-semibold text-brand-600">${a.subject}</span>
+                        <h3 class="font-bold text-slate-900 text-lg mt-0.5 mb-2 ${a.completed ? 'line-through text-slate-400' : ''}">${a.title}</h3>
+                        ${a.desc ? `<p class="text-xs text-slate-500 mb-4">${a.desc}</p>` : ''}
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-medium"><i class="fa-regular fa-calendar mr-1"></i> Due: ${a.date}</span>
+                        <button onclick="toggleAssignmentStatus(${a.id})" class="px-4 py-2 rounded-xl text-xs font-bold ${a.completed ? 'bg-slate-200 text-slate-700' : 'bg-brand-600 text-white shadow-sm'} transition">
+                            ${a.completed ? 'Mark Pending' : 'Mark Done'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            renderDashboard();
+        }
+
+        function openAssignmentModal() { document.getElementById('assignment-modal').classList.remove('hidden'); }
+        function closeAssignmentModal() { document.getElementById('assignment-modal').classList.add('hidden'); }
+
+        function submitAssignment(e) {
+            e.preventDefault();
+            assignmentsData.push({
+                id: Date.now(),
+                title: document.getElementById('assign-title').value,
+                subject: document.getElementById('assign-subject').value,
+                date: document.getElementById('assign-date').value,
+                priority: document.getElementById('assign-priority').value,
+                desc: document.getElementById('assign-desc').value,
+                completed: false
+            });
+            saveState();
+            closeAssignmentModal();
+            renderAssignments();
+            showToast("Assignment added!");
+            e.target.reset();
+        }
+
+        function toggleAssignmentStatus(id) {
+            const item = assignmentsData.find(a => a.id === id);
+            if(item) {
+                item.completed = !item.completed;
+                saveState();
+                renderAssignments();
+            }
+        }
+
+        function deleteAssignment(id) {
+            assignmentsData = assignmentsData.filter(a => a.id !== id);
+            saveState();
+            renderAssignments();
+            showToast("Assignment deleted.");
+        }
+
+        // --- CGPA CALCULATOR LOGIC ---
+        function renderCGPA() {
+            const tbody = document.getElementById('cgpa-courses-tbody');
+            let totalQP = 0;
+            let totalUnits = 0;
+            const gradePoints = { 'A': 5.0, 'B': 4.0, 'C': 3.0, 'D': 2.0, 'E': 1.0, 'F': 0.0 };
+
+            if(coursesData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 text-xs">No courses registered yet. Click 'Add Course' above.</td></tr>`;
+                document.getElementById('cgpa-display').textContent = '0.00';
+                document.getElementById('total-credits-display').textContent = '0';
+                document.getElementById('total-qp-display').textContent = '0.0';
+                document.getElementById('cgpa-status-text').textContent = 'No courses added';
+                return;
+            }
+
+            tbody.innerHTML = coursesData.map(c => {
+                const gp = gradePoints[c.grade] || 0;
+                totalQP += gp * c.units;
+                totalUnits += parseInt(c.units);
+
+                return `
+                    <tr>
+                        <td class="p-4 font-bold font-mono text-slate-800">${c.code}</td>
+                        <td class="p-4 text-slate-700">${c.name}</td>
+                        <td class="p-4">${c.units} Units</td>
+                        <td class="p-4 font-bold text-brand-600">${c.grade} (${gp.toFixed(1)})</td>
+                        <td class="p-4 text-right">
+                            <button onclick="deleteCourse(${c.id})" class="text-slate-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const cgpa = totalUnits > 0 ? (totalQP / totalUnits).toFixed(2) : '0.00';
+            document.getElementById('cgpa-display').textContent = cgpa;
+            document.getElementById('total-credits-display').textContent = totalUnits;
+            document.getElementById('total-qp-display').textContent = totalQP.toFixed(1);
+
+            let status = 'Keep pushing!';
+            if(cgpa >= 4.5) status = 'First Class Honours 🌟';
+            else if(cgpa >= 3.5) status = 'Second Class Upper (2:1) 🚀';
+            else if(cgpa >= 2.4) status = 'Second Class Lower (2:2) 👍';
+            else if(cgpa >= 1.5) status = 'Third Class 📚';
+            document.getElementById('cgpa-status-text').textContent = status;
+
+            renderDashboard();
+        }
+
+        function openCourseModal() { document.getElementById('course-modal').classList.remove('hidden'); }
+        function closeCourseModal() { document.getElementById('course-modal').classList.add('hidden'); }
+
+        function submitCourse(e) {
+            e.preventDefault();
+            coursesData.push({
+                id: Date.now(),
+                code: document.getElementById('course-code').value.toUpperCase(),
+                name: document.getElementById('course-name').value,
+                units: parseInt(document.getElementById('course-units').value),
+                grade: document.getElementById('course-grade').value
+            });
+            saveState();
+            closeCourseModal();
+            renderCGPA();
+            showToast("Course added successfully!");
+            e.target.reset();
+        }
+
+        function deleteCourse(id) {
+            coursesData = coursesData.filter(c => c.id !== id);
+            saveState();
+            renderCGPA();
+            showToast("Course removed.");
+        }
+
+        // --- EXAM COUNTDOWN LOGIC ---
+        function renderExams() {
+            const container = document.getElementById('exams-container');
+
+            if(examsData.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+                        <i class="fa-solid fa-hourglass-half text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800">No exams scheduled</h3>
+                        <p class="text-xs text-slate-500 mt-1">Add your upcoming exam timetables here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = examsData.map(e => {
+                const diffDays = Math.ceil((new Date(e.date) - new Date()) / (1000 * 60 * 60 * 24));
+                return `
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between relative group">
+                        <button onclick="deleteExam(${e.id})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                        <div>
+                            <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-3">${e.location}</span>
+                            <h3 class="font-bold text-slate-900 text-lg mb-1">${e.title}</h3>
+                            <p class="text-xs text-slate-500 mb-4"><i class="fa-regular fa-calendar mr-1"></i> ${e.date} at ${e.time}</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                            <span class="text-2xl font-black text-brand-600">${diffDays >= 0 ? diffDays : '0'}</span>
+                            <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider mt-0.5">${diffDays === 1 ? 'Day Remaining' : 'Days Remaining'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            renderDashboard();
+        }
+
+        function openExamModal() { document.getElementById('exam-modal').classList.remove('hidden'); }
+        function closeExamModal() { document.getElementById('exam-modal').classList.add('hidden'); }
+
+        function submitExam(e) {
+            e.preventDefault();
+            examsData.push({
+                id: Date.now(),
+                title: document.getElementById('exam-title').value,
+                date: document.getElementById('exam-date').value,
+                time: document.getElementById('exam-time').value,
+                location: document.getElementById('exam-location').value
+            });
+            saveState();
+            closeExamModal();
+            renderExams();
+            showToast("Exam countdown set!");
+            e.target.reset();
+        }
+
+        function deleteExam(id) {
+            examsData = examsData.filter(e => e.id !== id);
+            saveState();
+            renderExams();
+            showToast("Exam removed.");
+        }
+
+        // --- NOTES LOGIC ---
+        function renderNotes() {
+            const container = document.getElementById('notes-container');
+            const searchVal = document.getElementById('notes-search').value.toLowerCase();
+
+            const filtered = notesData.filter(n => 
+                n.title.toLowerCase().includes(searchVal) || 
+                n.subject.toLowerCase().includes(searchVal) ||
+                n.content.toLowerCase().includes(searchVal)
+            );
+
+            if(filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+                        <i class="fa-solid fa-book-open text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800">No notes found</h3>
+                        <p class="text-xs text-slate-500 mt-1">Create study summaries or lecture notes to review later.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(n => `
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between relative group">
+                    <button onclick="deleteNote(${n.id})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                    <div>
+                        <span class="bg-brand-50 text-brand-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-3">${n.subject}</span>
+                        <h3 class="font-bold text-slate-900 text-lg mb-2">${n.title}</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed line-clamp-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">${n.content}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 font-medium">
+                        Added: ${n.date}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openNoteModal() { document.getElementById('note-modal').classList.remove('hidden'); }
+        function closeNoteModal() { document.getElementById('note-modal').classList.add('hidden'); }
+
+        function submitNote(e) {
+            e.preventDefault();
+            const options = { month: 'long', day: 'numeric', year: 'numeric' };
+            notesData.unshift({
+                id: Date.now(),
+                title: document.getElementById('note-title').value,
+                subject: document.getElementById('note-subject').value,
+                date: new Date().toLocaleDateString('en-US', options),
+                content: document.getElementById('note-content').value
+            });
+            saveState();
+            closeNoteModal();
+            renderNotes();
+            showToast("Study note saved!");
+            e.target.reset();
+        }
+
+        function deleteNote(id) {
+            notesData = notesData.filter(n => n.id !== id);
+            saveState();
+            renderNotes();
+            showToast("Note deleted.");
+        }
+
+        // --- TOAST NOTIFICATION SYSTEM ---
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl text-xs font-semibold animate-fade-in pointer-events-auto flex items-center gap-3';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-brand-400"></i> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
